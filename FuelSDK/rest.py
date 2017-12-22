@@ -74,6 +74,10 @@ class ET_Constructor(object):
 
     def parse_props_into_ws_object(self, auth_stub, obj_type, props):
         empty_obj = auth_stub.soap_client.factory.create(obj_type)
+
+        # Some dummy attributes are set prefixed by __
+        [delattr(empty_obj, k) for k in empty_obj.__dict__.keys() if k.startswith('__') and not k.endswith('__')]
+
         if props is not None and type(props) is dict:
             ws_create = copy.copy(empty_obj)
             ws_create = self.parse_props_dict_into_ws_object(obj_type, ws_create, props)

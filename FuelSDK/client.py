@@ -8,9 +8,23 @@ import jwt
 import requests
 import suds.client
 import suds.wsse
+from suds.plugin import MessagePlugin
 from suds.sax.element import Element
 
 from FuelSDK.objects import ET_DataExtension,ET_Subscriber
+
+class LogPlugin(MessagePlugin):
+    def __init__(self):
+        self.last_sent_raw = None
+        self.last_received_raw = None
+
+    def sending(self, context):
+        self.last_sent_raw = str(context.envelope)
+
+    def received(self, context):
+        self.last_received_raw = str(context.reply)
+
+log_plugin = LogPlugin()
 
 
 class ET_Client(object):
@@ -157,7 +171,7 @@ class ET_Client(object):
         self.authObj = {'oAuth' : {'oAuthToken' : self.internalAuthToken}}          
         self.authObj['attributes'] = { 'oAuth' : { 'xmlns' : 'http://exacttarget.com' }}                        
 
-        self.soap_client = suds.client.Client(self.wsdl_file_url, faults=False, cachingpolicy=1)
+        self.soap_client = suds.client.Client(self.wsdl_file_url, faults=False, cachingpolicy=1, plugins=[log_plugin, ])
         self.soap_client.set_options(location=self.endpoint)
 
         element_oAuth = Element('oAuth', ns=('etns', 'http://exacttarget.com'))

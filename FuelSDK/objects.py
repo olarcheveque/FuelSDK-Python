@@ -1,4 +1,4 @@
-from rest import ET_CUDSupport,ET_CUDSupportRest,ET_GetSupport,ET_Get,ET_Patch,ET_Post,ET_Delete,ET_Configure
+from rest import ET_CUDSupport,ET_CUDSupportRest,ET_GetSupport,ET_Get,ET_Patch,ET_Post,ET_Delete,ET_Configure, ET_Perform
 
 ########
 ##
@@ -116,6 +116,27 @@ class ET_Email(ET_CUDSupport):
     def __init__(self):
         super(ET_Email, self).__init__()
         self.obj_type = 'Email'
+
+class ET_Template(ET_CUDSupport):
+    def __init__(self):
+        super(ET_Template, self).__init__()
+        self.obj_type = 'Template'
+
+class ET_SendClassification(ET_CUDSupport):
+    def __init__(self):
+        super(ET_SendClassification, self).__init__()
+        self.obj_type = 'SendClassification'
+
+class ET_EmailSendDefinition(ET_CUDSupport):
+    def __init__(self):
+        super(ET_EmailSendDefinition, self).__init__()
+        self.obj_type = 'EmailSendDefinition'
+
+    def perform(self, action):
+        ws_def = self.auth_stub.soap_client.factory.create(self.obj_type)
+        ws_def.CustomerKey = self.props['CustomerKey']
+        return ET_Perform(self.auth_stub, action, [{"Definition" : ws_def, }, ])
+
 
 class ET_TriggeredSend(ET_CUDSupport):
     subscribers = None

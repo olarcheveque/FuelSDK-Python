@@ -43,7 +43,6 @@ class ET_Constructor(object):
 
                 if self.code == 200:
                     self.status = True
-
                     if 'OverallStatus' in body:
                         self.message = body['OverallStatus']
                         if body['OverallStatus'] == "MoreDataAvailable":
@@ -136,6 +135,23 @@ class ET_Configure(ET_Constructor):
         if response is not None:
             #self.message = 'Describe: ' + obj_type
             super(ET_Configure, self).__init__(response)
+
+########
+##
+##    Used to Perform Objects via web service call
+##
+########
+class ET_Perform(ET_Constructor):
+    def __init__(self, auth_stub, action="", props=None):
+        auth_stub.refresh_token()
+
+        ws_performRequest = auth_stub.soap_client.factory.create('PerformRequestMsg')
+        ws_performRequest.Action = action
+        ws_performRequest.Definitions = props
+        response = auth_stub.soap_client.service.Perform(None, ws_performRequest)        
+
+        if response is not None:
+            super(ET_Perform, self).__init__(response)
 
 ########
 ##

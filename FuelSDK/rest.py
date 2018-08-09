@@ -157,6 +157,22 @@ class ET_Perform(ET_Constructor):
         if response is not None:
             super(ET_Perform, self).__init__(response)
 
+
+class ET_Schedule(ET_Constructor):
+    def __init__(self, auth_stub, action, schedule, interactions):
+        auth_stub.refresh_token()
+
+        ws_request = auth_stub.soap_client.factory.create('ScheduleRequestMsg')
+        ws_request.Action = action
+        ws_request.Schedule = schedule
+        ws_request.Interactions = interactions
+
+        response = auth_stub.soap_client.service.Schedule(None, ws_request)
+
+        if response is not None:
+            super(ET_Schedule, self).__init__(response)
+
+
 ########
 ##
 ##  Get call to a web service

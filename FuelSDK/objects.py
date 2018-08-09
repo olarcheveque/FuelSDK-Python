@@ -1,4 +1,7 @@
-from rest import ET_CUDSupport,ET_CUDSupportRest,ET_GetSupport,ET_Get,ET_Patch,ET_Post,ET_Delete,ET_Configure, ET_Perform
+from .rest import (
+    ET_CUDSupport, ET_CUDSupportRest, ET_GetSupport, ET_Get, ET_Patch, ET_Post,
+    ET_Delete, ET_Configure, ET_Perform, ET_Schedule,
+)
 
 ########
 ##
@@ -135,7 +138,41 @@ class ET_EmailSendDefinition(ET_CUDSupport):
     def perform(self, action):
         ws_def = self.auth_stub.soap_client.factory.create(self.obj_type)
         ws_def.CustomerKey = self.props['CustomerKey']
-        return ET_Perform(self.auth_stub, action, [{"Definition" : ws_def, }, ])
+        definitions = [{'Definition': ws_def}]
+        return ET_Perform(self.auth_stub, action, definitions)
+
+
+class ET_ScheduleDefinition(ET_CUDSupport):
+    def __init__(self):
+        super(ET_ScheduleDefinition, self).__init__()
+        self.obj_type = 'ScheduleDefinition'
+
+    def schedule(self):
+        factory = self.auth_stub.soap_client.factory
+
+        recurrence_type = self.props['RecurrenceType']
+        recurrence_def = factory.create(recurrence_type)
+        for attr, value in self.props[recurrence_type].items():
+            setattr(recurrence_def, attr, value)
+
+        schedule_def = factory.create(self.obj_type)
+        schedule_def.Recurrence = recurrence_def
+        for attr, value in self.props[self.obj_type].items():
+            setattr(schedule_def, attr, value)
+
+        email_send_def = factory.create('EmailSendDefinition')
+        for attr, value in self.props['EmailSendDefinition'].items():
+            setattr(email_send_def, attr, value)
+
+        interactions = [{'Interaction': email_send_def}]
+
+        return ET_Schedule(self.auth_stub, 'start', schedule_def, interactions)
+
+    def cancel(self):
+        ws_def = self.auth_stub.soap_client.factory.create('Send')
+        ws_def.ID = self.props['ID']
+        definitions = [{'Definition': ws_def}]
+        return ET_Perform(self.auth_stub, 'cancel', definitions)
 
 
 class ET_TriggeredSend(ET_CUDSupport):

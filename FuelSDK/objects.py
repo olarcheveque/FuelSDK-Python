@@ -168,6 +168,12 @@ class ET_ScheduleDefinition(ET_CUDSupport):
 
         return ET_Schedule(self.auth_stub, 'start', schedule_def, interactions)
 
+    def cancel(self):
+        ws_def = self.auth_stub.soap_client.factory.create('Send')
+        ws_def.ID = self.props['ID']
+        definitions = [{'Definition': ws_def}]
+        return ET_Perform(self.auth_stub, 'cancel', definitions)
+
 
 class ET_TriggeredSend(ET_CUDSupport):
     subscribers = None
